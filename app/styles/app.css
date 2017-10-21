@@ -1,0 +1,15 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+@media print {
+  @page {
+    size: 2in 5in;
+    margin: 0.3cm;
+  }
+
+  button {
+    display: none;
+  }
+}
