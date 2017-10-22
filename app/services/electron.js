@@ -4,7 +4,6 @@ import RSVP from 'rsvp'
 export default Ember.Service.extend({
   dbIsLoaded: false,
   passwordIsSetup: false,
-
   appIsReady: Ember.computed.and('dbIsLoaded', 'passwordIsSetup'),
 
   electron: Ember.computed(function () {
@@ -32,15 +31,16 @@ export default Ember.Service.extend({
   },
 
   setupDB (folder) {
-    this.fetch('setupDB', { folder }).then(() => {
+    this.fetch('configuration:setupDB', { folder }).then(() => {
       Ember.set(this, 'dbIsLoaded', true)
     }, (e) => {
+      console.log(e)
       Ember.set(this, 'dbIsLoaded', false)
     })
   },
 
   checkSetup () {
-    this.fetch('checkSetup', {}).then((setupData) => {
+    this.fetch('configuration:checkSetup', {}).then((setupData) => {
       Ember.setProperties(this, setupData)
     }, (e) => {
       console.log(e)
