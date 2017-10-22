@@ -76,6 +76,27 @@ module.exports = {
     return event.sender.webContents
   },
 
+  setupDB (event, data, resolve, reject) {
+    const DBFolder = data.folder
+
+    if (!DBFolder) {
+      reject({isError: true, reason: 'Cannot find path'})
+    }
+
+    const tmpDBPath = './db-path';
+
+    fs.writeFile(tmpDBPath, DBFolder, function (error) {
+      if (error) {
+        return reject({
+          isError: true,
+          reason: 'cannot write file'
+        })
+      }
+
+      return resolve({folder: DBFolder})
+    })
+  },
+
   checkAuth (event, data, resolve, reject) {
     const pdfPath = path.join(__dirname, 'print.pdf')
 

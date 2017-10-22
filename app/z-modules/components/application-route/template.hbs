@@ -1,1 +1,16 @@
-{{yield}}
+<main role="main" class="container">
+  {{#unless dbIsLoaded}}
+    {{application-route/setup-db}}
+  {{/unless}}
+
+
+  {{#if showPasswordSetup}}
+    <h1>Password setup</h1>
+  {{/if}}
+
+  {{#if appIsReady}}
+    {{yield}}
+  {{/if}}
+</main>
+
+

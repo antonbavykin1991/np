@@ -2,6 +2,11 @@ import Ember from 'ember'
 import RSVP from 'rsvp'
 
 export default Ember.Service.extend({
+  dbIsLoaded: false,
+  passwordIsSetup: false,
+
+  appIsReady: Ember.computed.and('dbIsLoaded', 'passwordIsSetup'),
+
   electron: Ember.computed(function () {
     return window.require("electron")
   }),
@@ -23,6 +28,14 @@ export default Ember.Service.extend({
       const params = Object.assign({}, {eventName}, data)
 
       ipcRenderer.send('message', params)
+    })
+  },
+
+  setupDB (folder) {
+    this.fetch('setupDB', { folder }).then((res) => {
+      this.set('dbIsLoaded', true)
+    }, (e) => {
+      this.set('dbIsLoaded', false)
     })
   }
 });
