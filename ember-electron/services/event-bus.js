@@ -1,26 +1,12 @@
 const {ipcMain, app, BrowserWindow, Menu, Tray, shell} = require('electron')
-const Datastore = require('nedb')
 const path = require('path')
-
-// const db = new Datastore({ filename: '/Users/antonbavykin/db', autoload: true });
-// const store = {}
 
 const fs = require('fs')
 
+const TMP_DB_PATH = './db-path'
 
-// db.insert(doc, function (err, newDoc) {   // Callback is optional
-//   // newDoc is the newly inserted document, including its _id
-//   // newDoc has no key called notToBeSaved since its value was undefined
-// });
+const db = require('./db')
 
-// db.loadDatabase(function (err) {    // Callback is optional
-
-//   console.log(err, 'data loaded')
-
-//   db.find({ hello: 'world' }, function (err, docs) {
-//     console.log(err, docs)
-//   });
-// });
 
 
 const RESPONCE_POSTFIX = 'responce'
@@ -38,12 +24,12 @@ module.exports = {
 
     const resFunction = (responce) => webContents.send(responceEventName, responce)
 
-    this._responce(...arguments)
+    this._response(...arguments)
       .then(resFunction)
       .catch(resFunction)
   },
 
-  _responce(event, data) {
+  _response(event, data) {
     return new Promise((resolve, reject) => {
       this._eventRoute(event, data, resolve, reject)
     })
@@ -83,9 +69,9 @@ module.exports = {
       reject({isError: true, reason: 'Cannot find path'})
     }
 
-    const tmpDBPath = './db-path';
+    console.log(DBFolder)
 
-    fs.writeFile(tmpDBPath, DBFolder, function (error) {
+    fs.writeFile(TMP_DB_PATH, DBFolder, function (error) {
       if (error) {
         return reject({
           isError: true,
@@ -93,7 +79,33 @@ module.exports = {
         })
       }
 
-      return resolve({folder: DBFolder})
+      db.init({ filename: DBFolder, autoload: true }).then(() => {
+        resolve({folder: DBFolder})
+      })
+    })
+  },
+
+  _checkDBSetup () {
+    return new Promise((resolve, reject) => {
+      fs.exists(TMP_DB_PATH, (exists) => {
+
+        resolve({dbIsLoaded: !!exists})
+      })
+    })
+  },
+
+  checkSetup (event, data, resolve, reject) {
+    const setupData = {
+      dbIsLoaded: false,
+      passwordIsSetup: false
+    }
+
+    return this._checkDBSetup().then(({dbIsLoaded}) => {
+      setupData.dbIsLoaded = dbIsLoaded
+    }).then(() => {
+      setupData.passwordIsSetup = false
+    }).then(() => {
+      return resolve(setupData)
     })
   },
 

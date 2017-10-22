@@ -32,10 +32,18 @@ export default Ember.Service.extend({
   },
 
   setupDB (folder) {
-    this.fetch('setupDB', { folder }).then((res) => {
-      this.set('dbIsLoaded', true)
+    this.fetch('setupDB', { folder }).then(() => {
+      Ember.set(this, 'dbIsLoaded', true)
     }, (e) => {
-      this.set('dbIsLoaded', false)
+      Ember.set(this, 'dbIsLoaded', false)
+    })
+  },
+
+  checkSetup () {
+    this.fetch('checkSetup', {}).then((setupData) => {
+      Ember.setProperties(this, setupData)
+    }, (e) => {
+      console.log(e)
     })
   }
 });
