@@ -8,7 +8,12 @@ export default Ember.Component.extend({
   passwordRepeat: null,
 
   isError: Ember.computed('password', 'passwordRepeat', function () {
-    return Ember.get(this, 'password') !== Ember.get(this, 'passwordRepeat')
+    const {
+      password,
+      passwordRepeat
+    } = Ember.getProperties(this, 'password', 'passwordRepeat')
+
+    return !password || (password !== passwordRepeat)
   }),
 
   onSubmit(password) {
