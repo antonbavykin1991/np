@@ -6,12 +6,20 @@ const fs = require('fs')
 const PASSWORD_FILE_NAME = 'password.db'
 
 module.exports = {
-  _checkDBPath () {
+  _checkGlobalPath () {
     return fs.existsSync(TMP_DB_PATH)
   },
 
+  _getGlobalPath () {
+    if (!this._checkGlobalPath()) {
+      return null
+    }
+
+    return fs.readFileSync(TMP_DB_PATH, 'utf8')
+  },
+
   _getPasswordFilePath () {
-    if (!this._checkDBPath()) {
+    if (!this._checkGlobalPath()) {
       return null
     }
 
@@ -30,20 +38,48 @@ module.exports = {
     return fs.existsSync(passwordPath)
   },
 
-  checkSetup (event, data, resolve, reject) {
+  _setupDB () {
+    const globalPath = this._getGlobalPath()
+    return db.init({ filename: globalPath, autoload: true })
+  },
+
+  _getSetupData () {
     const setupData = {
-      dbIsLoaded: this._checkDBPath(),
+      globalPathIsSetup: this._checkGlobalPath(),
       passwordIsSetup: this._checkPasswordPath()
     }
 
-    return resolve(setupData)
+    return new Promise((resolve) => {
+      if (this._checkGlobalPath()) {
+        return this._setupDB().then(() => {
+          resolve(setupData)
+        })
+      }
+
+      resolve(setupData)
+    })
   },
 
-  setupDB (event, data, resolve, reject) {
+  checkSetup (event, data, resolve, reject) {
+    const setupData = {
+      globalPathIsSetup: this._checkGlobalPath(),
+      passwordIsSetup: this._checkPasswordPath()
+    }
+
+    if (this._checkGlobalPath()) {
+      return this._setupDB().then(() => {
+        resolve(setupData)
+      })
+    }
+
+    resolve(setupData)
+  },
+
+  setupGlobalPath (event, data, resolve, reject) {
     const DBFolder = data.folder
 
     if (!DBFolder) {
-      console.log('setupDB: Cannot find path')
+      console.log('setupGlobalPath: Cannot find path')
 
       return reject({
         isError: true,
@@ -53,7 +89,7 @@ module.exports = {
 
     fs.writeFile(TMP_DB_PATH, DBFolder,  (error) => {
       if (error) {
-        console.log('setupDB: Cannot write file')
+        console.log('setupGlobalPath: Cannot write file')
 
         return reject({
           isError: true,
@@ -61,19 +97,12 @@ module.exports = {
         })
       }
 
-      db.init({ filename: DBFolder, autoload: true }).then(() => {
-        resolve({
-          dbIsLoaded: true,
-          passwordIsSetup: this._checkPasswordPath()
-        })
-      })
+      return this.checkSetup(null, null, resolve, reject)
     })
   },
 
   setupPassword (event, data, resolve, reject) {
     const password = data.password
-
-    console.log(password)
 
     if (!password) {
       console.log('setupPassword: Cannot read data.password')

@@ -1,6 +1,6 @@
 <main role="main" class="container">
-  {{#unless dbIsLoaded}}
-    {{application-route/setup-db}}
+  {{#unless globalPathIsSetup}}
+    {{application-route/setup-global-path}}
   {{/unless}}
 
   {{#if showPasswordSetup}}

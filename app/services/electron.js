@@ -2,9 +2,11 @@ import Ember from 'ember'
 import RSVP from 'rsvp'
 
 export default Ember.Service.extend({
-  dbIsLoaded: false,
+  globalPathIsSetup: false,
+
   passwordIsSetup: false,
-  appIsReady: Ember.computed.and('dbIsLoaded', 'passwordIsSetup'),
+
+  appIsReady: Ember.computed.and('globalPathIsSetup', 'passwordIsSetup'),
 
   electron: Ember.computed(function () {
     return window.require("electron")
@@ -38,12 +40,12 @@ export default Ember.Service.extend({
     })
   },
 
-  setupDB (folder) {
-    this.fetch('configuration:setupDB', { folder }).then((setupData) => {
+  setupGlobalPath (folder) {
+    this.fetch('configuration:setupGlobalPath', { folder }).then((setupData) => {
       Ember.setProperties(this, setupData)
     }, (e) => {
       console.log(e)
-      Ember.set(this, 'dbIsLoaded', false)
+      Ember.set(this, 'globalPathIsSetup', false)
     })
   },
 

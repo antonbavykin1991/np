@@ -15,6 +15,6 @@ export default Ember.Component.extend({
       return false
     }
 
-    Ember.get(this, 'electron').setupDB(...arguments)
+    Ember.get(this, 'electron').setupGlobalPath(...arguments)
   }
 });
