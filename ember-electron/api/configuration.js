@@ -1,4 +1,3 @@
-const TMP_DB_PATH = './db-path'
 const db = require('../services/db')
 const path = require('path')
 const fs = require('fs')
@@ -6,26 +5,22 @@ const fs = require('fs')
 const PASSWORD_FILE_NAME = 'password.db'
 
 module.exports = {
-  _checkGlobalPath () {
-    return fs.existsSync(TMP_DB_PATH)
+  globalPath: null,
+
+  _setGlobalPath (globalPath) {
+    this.globalPath = globalPath
   },
 
-  _getGlobalPath () {
-    if (!this._checkGlobalPath()) {
-      return null
-    }
-
-    return fs.readFileSync(TMP_DB_PATH, 'utf8')
+  _checkGlobalPath () {
+    return this.globalPath
   },
 
   _getPasswordFilePath () {
-    if (!this._checkGlobalPath()) {
+    if (!this.globalPath) {
       return null
     }
 
-    const globalPath = fs.readFileSync(TMP_DB_PATH, 'utf8')
-
-    return path.resolve(globalPath, PASSWORD_FILE_NAME)
+    return path.resolve(this.globalPath, PASSWORD_FILE_NAME)
   },
 
   _checkPasswordPath () {
@@ -39,28 +34,12 @@ module.exports = {
   },
 
   _setupDB () {
-    const globalPath = this._getGlobalPath()
-    return db.init({ filename: globalPath, autoload: true })
-  },
-
-  _getSetupData () {
-    const setupData = {
-      globalPathIsSetup: this._checkGlobalPath(),
-      passwordIsSetup: this._checkPasswordPath()
-    }
-
-    return new Promise((resolve) => {
-      if (this._checkGlobalPath()) {
-        return this._setupDB().then(() => {
-          resolve(setupData)
-        })
-      }
-
-      resolve(setupData)
-    })
+    return db.init({ filename: this.globalPath, autoload: true })
   },
 
   checkSetup (event, data, resolve, reject) {
+    this._setGlobalPath(data.globalPath)
+
     const setupData = {
       globalPathIsSetup: this._checkGlobalPath(),
       passwordIsSetup: this._checkPasswordPath()
@@ -76,29 +55,18 @@ module.exports = {
   },
 
   setupGlobalPath (event, data, resolve, reject) {
-    const DBFolder = data.folder
+    const globalPath = data.globalPath
 
-    if (!DBFolder) {
-      console.log('setupGlobalPath: Cannot find path')
+    if (!globalPath) {
+      console.log('setupGlobalPath: Cannot find globalPath')
 
       return reject({
         isError: true,
-        reason: 'Cannot find path'
+        reason: 'Cannot find globalPath'
       })
     }
 
-    fs.writeFile(TMP_DB_PATH, DBFolder,  (error) => {
-      if (error) {
-        console.log('setupGlobalPath: Cannot write file')
-
-        return reject({
-          isError: true,
-          reason: 'Cannot write file'
-        })
-      }
-
-      return this.checkSetup(null, null, resolve, reject)
-    })
+    return this.checkSetup(event, data, resolve, reject)
   },
 
   setupPassword (event, data, resolve, reject) {

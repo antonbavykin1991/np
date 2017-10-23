@@ -1,6 +1,8 @@
 import Ember from 'ember'
 import RSVP from 'rsvp'
 
+const GLOBAL_PATH = 'global-path'
+
 export default Ember.Service.extend({
   globalPathIsSetup: false,
 
@@ -32,29 +34,41 @@ export default Ember.Service.extend({
     })
   },
 
+  getGlobalPath () {
+    return window.localStorage.getItem(GLOBAL_PATH)
+  },
+
+  setGlobalPath (globalPath) {
+    window.localStorage.setItem(GLOBAL_PATH, globalPath)
+  },
+
   checkSetup () {
-    this.fetch('configuration:checkSetup', {}).then((setupData) => {
+    const globalPath = this.getGlobalPath()
+
+    this.fetch('configuration:checkSetup', {globalPath}).then((setupData) => {
       Ember.setProperties(this, setupData)
-    }, (e) => {
-      console.log(e)
+    }, (error) => {
+      Ember.Logger.error(error)
     })
   },
 
-  setupGlobalPath (folder) {
-    this.fetch('configuration:setupGlobalPath', { folder }).then((setupData) => {
+  setupGlobalPath (globalPath) {
+    this.setGlobalPath(globalPath)
+
+    this.fetch('configuration:setupGlobalPath', { globalPath }).then((setupData) => {
       Ember.setProperties(this, setupData)
-    }, (e) => {
-      console.log(e)
+    }, (error) => {
       Ember.set(this, 'globalPathIsSetup', false)
+      Ember.Logger.error(error)
     })
   },
 
   setupPassword (password) {
     this.fetch('configuration:setupPassword', { password: window.btoa(password) }).then(() => {
       Ember.set(this, 'passwordIsSetup', true)
-    }, (e) => {
-      console.log(e)
+    }, (error) => {
       Ember.set(this, 'passwordIsSetup', false)
+      Ember.Logger.error(error)
     })
   }
 });

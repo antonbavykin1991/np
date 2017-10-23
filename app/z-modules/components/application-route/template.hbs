@@ -1,16 +1,18 @@
 <main role="main" class="container">
-  {{#unless globalPathIsSetup}}
-    {{application-route/setup-global-path}}
-  {{/unless}}
-
-  {{#if showPasswordSetup}}
-    {{application-route/setup-password}}
-  {{/if}}
-
   {{#if appIsReady}}
-    <h1>App ready</h1>
+    <div class="page-header">
+      <h1>Example page header <small>Subtext for header</small></h1>
+    </div>
 
     {{yield}}
+  {{else}}
+    {{#unless globalPathIsSetup}}
+      {{application-route/setup-global-path}}
+    {{/unless}}
+
+    {{#if showPasswordSetup}}
+      {{application-route/setup-password}}
+    {{/if}}
   {{/if}}
 </main>
 
