@@ -3,12 +3,13 @@
     {{application-route/setup-db}}
   {{/unless}}
 
-
   {{#if showPasswordSetup}}
-    <h1>Password setup</h1>
+    {{application-route/setup-password}}
   {{/if}}
 
   {{#if appIsReady}}
+    <h1>App ready</h1>
+
     {{yield}}
   {{/if}}
 </main>

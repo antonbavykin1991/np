@@ -1,0 +1,32 @@
+<div class="row">
+  <div class="col col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h1>Настройка Доступа</h1>
+      </div>
+      <div class="card-body">
+        <form {{action onSubmit password passwordRepeat on='submit'}}>
+          <div class="form-group">
+            <label for="exampleInputEmail1">Введите пароль для администратора:</label>
+            {{input type="password" value=password class="form-control"}}
+          </div>
+          <div class="form-group">
+            <label for="exampleInputEmail1">Повторите ввод пароля:</label>
+            {{input type="password" value=passwordRepeat class="form-control"}}
+          </div>
+          {{#if isError}}
+            <div class="form-group">
+              <small class="form-text text-muted">
+                Пароли должны совпадать :)
+              </small>
+            </div>
+          {{/if}}
+
+          <button type="submit" class="btn btn-primary">Далее</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+

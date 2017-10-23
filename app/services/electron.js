@@ -30,20 +30,29 @@ export default Ember.Service.extend({
     })
   },
 
+  checkSetup () {
+    this.fetch('configuration:checkSetup', {}).then((setupData) => {
+      Ember.setProperties(this, setupData)
+    }, (e) => {
+      console.log(e)
+    })
+  },
+
   setupDB (folder) {
-    this.fetch('configuration:setupDB', { folder }).then(() => {
-      Ember.set(this, 'dbIsLoaded', true)
+    this.fetch('configuration:setupDB', { folder }).then((setupData) => {
+      Ember.setProperties(this, setupData)
     }, (e) => {
       console.log(e)
       Ember.set(this, 'dbIsLoaded', false)
     })
   },
 
-  checkSetup () {
-    this.fetch('configuration:checkSetup', {}).then((setupData) => {
-      Ember.setProperties(this, setupData)
+  setupPassword (password) {
+    this.fetch('configuration:setupPassword', { password: window.btoa(password) }).then(() => {
+      Ember.set(this, 'passwordIsSetup', true)
     }, (e) => {
       console.log(e)
+      Ember.set(this, 'passwordIsSetup', false)
     })
   }
 });

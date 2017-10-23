@@ -49,40 +49,5 @@ module.exports = {
 
       return {fullPath}
     })
-  },
-
-  _response (params, method) {
-    return new Promise((resolve, reject) => {
-      if (!this.db) {
-        return reject({
-          isError: true,
-          reason: 'You should setup Database first'
-        })
-      }
-
-      if (!this.db[method]) {
-        return reject({
-          isError: true,
-          reason: 'Cannot find method: ' + method
-        })
-      }
-
-      this.db[method](params, function (err, result) {
-        if (err) {
-          return reject(err)
-        }
-
-        resolve(result)
-      })
-    })
-  },
-
-  insert: function (params) {
-    return this._response(params, 'insert')
-  },
-
-  find: function (params) {
-    return this._response(params, 'find')
   }
-
 }
