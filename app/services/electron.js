@@ -8,7 +8,11 @@ export default Ember.Service.extend({
 
   passwordIsSetup: false,
 
+  isAuthenticated: true,
+
   appIsReady: Ember.computed.and('globalPathIsSetup', 'passwordIsSetup'),
+
+  showHeader: Ember.computed.and('appIsReady', 'isAuthenticated'),
 
   electron: Ember.computed(function () {
     return window.require("electron")
@@ -42,33 +46,45 @@ export default Ember.Service.extend({
     window.localStorage.setItem(GLOBAL_PATH, globalPath)
   },
 
-  checkSetup () {
+  async checkSetup () {
     const globalPath = this.getGlobalPath()
 
-    this.fetch('configuration:checkSetup', {globalPath}).then((setupData) => {
+    try {
+      const setupData = await this.fetch('configuration:checkSetup', {globalPath})
       Ember.setProperties(this, setupData)
-    }, (error) => {
+    } catch (error) {
       Ember.Logger.error(error)
-    })
+    }
   },
 
-  setupGlobalPath (globalPath) {
+  async setupGlobalPath (globalPath) {
     this.setGlobalPath(globalPath)
 
-    this.fetch('configuration:setupGlobalPath', { globalPath }).then((setupData) => {
+    try {
+      const setupData = await this.fetch('configuration:setupGlobalPath', { globalPath })
       Ember.setProperties(this, setupData)
-    }, (error) => {
+    } catch (error) {
       Ember.set(this, 'globalPathIsSetup', false)
       Ember.Logger.error(error)
-    })
+    }
+  },
+
+  async _checkPassword (password, method, key) {
+    try {
+      await this.fetch(`configuration:${method}`, { password: window.btoa(password) })
+      Ember.set(this, key, true)
+    } catch (error) {
+      Ember.set(this, key, false)
+      Ember.Logger.error(error)
+      return error
+    }
   },
 
   setupPassword (password) {
-    this.fetch('configuration:setupPassword', { password: window.btoa(password) }).then(() => {
-      Ember.set(this, 'passwordIsSetup', true)
-    }, (error) => {
-      Ember.set(this, 'passwordIsSetup', false)
-      Ember.Logger.error(error)
-    })
+    return this._checkPassword (password, 'setupPassword', 'passwordIsSetup')
+  },
+
+  checkAuth (password) {
+    return this._checkPassword (password, 'checkPassword', 'isAuthenticated')
   }
 });

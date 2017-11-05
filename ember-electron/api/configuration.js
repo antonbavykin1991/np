@@ -97,5 +97,47 @@ module.exports = {
         passwordIsSetup: true
       })
     })
+  },
+
+  checkPassword (event, data, resolve, reject) {
+    const password = data.password
+
+    if (!password) {
+      console.log('checkPassword: Cannot read data.password')
+
+      return reject({
+        isError: true,
+        reason: 'Cannot read data.password'
+      })
+    }
+
+    const passwordPath = this._getPasswordFilePath()
+
+
+    fs.readFile(passwordPath, 'utf8', function (error, fileData) {
+      if (error) {
+        console.log(`checkPassword: Cannot read file: ${passwordPath}`)
+
+        return reject({
+          isError: true,
+          reason: `Cannot read file: ${passwordPath}`
+        })
+      }
+
+      console.log(fileData, password)
+
+      if (fileData !== password) {
+        console.log(`checkPassword: Password is not match`)
+
+        return reject({
+          isError: true,
+          reason: `Password is not match`
+        })
+      }
+
+      return resolve({
+        isAuthenticated: true
+      })
+    })
   }
 }

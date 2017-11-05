@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col col-md-12">
+    <div class="card">
+      <div class="card-body">
+        <form {{action checkAuth password  on='submit'}}>
+          <div class="form-group">
+            <label for="password">Введите пароль:</label>
+            {{input id="password" type="password" value=password class="form-control"}}
+          </div>
+
+          {{#if isError}}
+            <div class="form-group">
+              <small class="form-text text-muted">
+                Злоумышленник!!! Пароль неверный!
+              </small>
+            </div>
+          {{/if}}
+
+          <button type="submit" class="btn btn-primary">Далее</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
